@@ -87,6 +87,10 @@ class _LoginPageState extends State<LoginPage> {
                             autovalidateMode: AutovalidateMode.onUserInteraction,
                             controller: _emailController,
                             decoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Icons.email, 
+                                color: Colors.grey
+                                ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                   color: Colors.black,
@@ -126,6 +130,10 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Icons.key_outlined, 
+                                color: Colors.grey
+                                ),
                               border: OutlineInputBorder(
                                 borderSide: const BorderSide(
                                   color: Colors.black,

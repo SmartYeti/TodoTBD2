@@ -1,16 +1,16 @@
 class Config {
   static const String endpoint = 'https://cloud.appwrite.io/v1';
-  static const String projectId = '650048b89b8f7aa6c827';
+  static const String projectId = '655ab2956f1322156b54';
 
-  static const String userdbId = '6504383824a95a4a1ced';
-  static const String userDetailsId = '65043865b6721f052d3e';
+  static const String userdbId = '655ab35cf33cce2ba9ac';
+  static const String userDetailsId = '655ab377916c2c3948c8';
 
   // for Task Collection
-  static const String todoTitleID = '65253ee8e99f919f6037';
+  static const String todoTitleID = '655ab385e3475f75ff98';
 
-  static const String grocerydbId = '6548eaa28e61058cabf2';
-  
-  static const String titleGrocerydbId = '654a1889ee055235639b';
+  static const String grocerydbId = '655ab390be6675b321ae';
+
+  static const String titleGrocerydbId = '655ab39c21d2afba1ed6';
 
   static const String sessionIdKey = 'Session_Id';
 }

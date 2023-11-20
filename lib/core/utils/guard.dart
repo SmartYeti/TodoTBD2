@@ -6,6 +6,8 @@ class Guard {
     return null;
   }
 
+ 
+
   static String? againstEmptyString(dynamic val, String name) {
     final String? isNull = againstNull(val, name);
 

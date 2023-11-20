@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list/core/enum/state_status.enum.dart';
 import 'package:todo_list/core/global_widgets/snackbar.widget.dart';
+import 'package:todo_list/core/utils/guard.dart';
 import 'package:todo_list/features/auth/todo/domain/models/create_todo.model.dart';
 import 'package:todo_list/features/auth/todo/domain/models/update_todo.models.dart';
 import 'package:todo_list/features/auth/todo/domain/todo_bloc/todo_bloc.dart';
@@ -19,6 +20,7 @@ class _MyFormPageState extends State<MyFormPage> {
   late TextEditingController _updateTitleController;
   late TextEditingController _updateDescriptionController;
   late TodoBloc _todoBloc;
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
   @override
   void initState() {
@@ -60,6 +62,7 @@ class _MyFormPageState extends State<MyFormPage> {
             );
           }
           return Form(
+            key: _formKey,
             child: Column(
               children: [
                 Padding(
@@ -67,7 +70,8 @@ class _MyFormPageState extends State<MyFormPage> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
                   child: SizedBox(
                     width: 600,
-                    child: TextField(
+                    child: TextFormField(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _updateTitleController,
                       autofocus: true,
                       decoration: const InputDecoration(
@@ -85,6 +89,9 @@ class _MyFormPageState extends State<MyFormPage> {
                           ),  
                           labelStyle: TextStyle(color: Colors.black),
                           labelText: 'Title',),
+                          validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Title');
+                      }
                     ),
                   ),
                 ),
@@ -93,7 +100,8 @@ class _MyFormPageState extends State<MyFormPage> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
                   child: SizedBox(
                     width: 600,
-                    child: TextField(
+                    child: TextFormField(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _updateDescriptionController,
                       autofocus: true,
                       minLines: 3,
@@ -113,6 +121,9 @@ class _MyFormPageState extends State<MyFormPage> {
                           ),  
                           labelStyle: TextStyle(color: Colors.black),
                           labelText: 'Description',),
+                          validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Description');
+                      }
                     ),
                   ),
                 ),
@@ -171,7 +182,8 @@ class _MyFormPageState extends State<MyFormPage> {
   }
 
   void _updateTask(BuildContext context) {
-    _todoBloc.add(
+    if (_formKey.currentState!.validate()){
+      _todoBloc.add(
       UpdateTodoEvent(
         updateTodoModel: UpdateTodoModel(
             id: _updatedId.text,
@@ -179,5 +191,25 @@ class _MyFormPageState extends State<MyFormPage> {
             description: _updateDescriptionController.text),
       ),
     );
+    }
+    
   }
+
+  // void _authAdd(BuildContext context) {
+  //   if (_formKey.currentState!.validate()) {
+  //     // _addTask(context);
+  //     // Navigator.of(context).pop();
+  //     // _titleController.clear();
+  //     // _descriptionController.clear();
+  //     _todoBloc.add(
+  //       AddTodoEvent(
+  //           addtodoModel: AddTodoModel(
+  //         title: _titleController.text,
+  //         description: _descriptionController.text,
+  //         userId: userId,
+  //       )),
+  //     );
+  //     Navigator.of(context).pop();
+  //   }
+  // }
 }

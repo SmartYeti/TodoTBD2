@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list/core/enum/state_status.enum.dart';
 import 'package:todo_list/core/global_widgets/snackbar.widget.dart';
+import 'package:todo_list/core/utils/guard.dart';
 import 'package:todo_list/features/auth/grocery/domain/grocery_bloc/grocery_bloc.dart';
 import 'package:todo_list/features/auth/grocery/domain/models/grocery.model.dart';
 import 'package:todo_list/features/auth/grocery/domain/models/update_grocery.model.dart';
@@ -20,6 +21,8 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
   late TextEditingController _updateQuantity;
   late TextEditingController _updatePrice;
   late GroceryItemBloc _groceryItemBloc;
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
 
   @override
   void initState() {
@@ -62,6 +65,7 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
             );
           }
           return Form(
+            key: _formKey,
             child: Column(
               children: [
                 Padding(
@@ -69,13 +73,41 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
                   child: SizedBox(
                     width: 600,
-                    child: TextField(
+                    child: TextFormField(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _updateProductName,
                       autofocus: true,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.horizontal()),
-                          labelText: 'Product Name'),
+                      decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(color: Colors.black),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              labelStyle: const TextStyle(
+                                color: Colors.green,
+                              ),
+                              labelText: 'Product Name',
+                      ),
+                      validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Product Name');
+                      }
                     ),
                   ),
                 ),
@@ -84,14 +116,42 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
                   child: SizedBox(
                     width: 600,
-                    child: TextField(
+                    child: TextFormField(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _updateQuantity,
                       keyboardType: TextInputType.number,
                       autofocus: true,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.horizontal()),
-                          labelText: 'Qunatity'),
+                      decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(color: Colors.black),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              labelStyle: const TextStyle(
+                                color: Colors.green,
+                              ),
+                              labelText: 'Quantity',
+                      ),
+                      validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Quantity');
+                      }
                     ),
                   ),
                 ),
@@ -100,14 +160,42 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
                   child: SizedBox(
                     width: 600,
-                    child: TextField(
+                    child: TextFormField(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _updatePrice,
                       keyboardType: TextInputType.number,
                       autofocus: true,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.horizontal()),
-                          labelText: 'Price'),
+                      decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(color: Colors.black),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.black,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              labelStyle: const TextStyle(
+                                color: Colors.green,
+                              ),
+                              labelText: 'Price',
+                      ),
+                      validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Price');
+                      }
                     ),
                   ),
                 ),
@@ -132,8 +220,8 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
                             horizontal: 10, vertical: 16),
                         child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple.shade200,
-                                foregroundColor: Colors.purple.shade400),
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white),
                             onPressed: () {
                               _updateItem(context);
                               Navigator.pop(context);
@@ -162,10 +250,12 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
       SnackBarUtils.defualtSnackBar('Task successfully updated!', context);
       return;
     }
+    
   }
 
   void _updateItem(BuildContext context) {
-    _groceryItemBloc.add(
+    if(_formKey.currentState!.validate()){
+      _groceryItemBloc.add(
       UpdateGroceryEvent(
         updateGroceryModel: UpdateGroceryModel(
             id: _updateItemId,
@@ -174,5 +264,7 @@ class _UpdateGroceryItemPageState extends State<UpdateGroceryItemPage> {
             price: _updatePrice.text),
       ),
     );
+    }
+    
   }
 }

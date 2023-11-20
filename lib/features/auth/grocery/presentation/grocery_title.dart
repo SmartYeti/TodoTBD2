@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list/core/dependency_injection/di_container.dart';
 import 'package:todo_list/core/enum/state_status.enum.dart';
 import 'package:todo_list/core/global_widgets/snackbar.widget.dart';
+import 'package:todo_list/core/utils/guard.dart';
 import 'package:todo_list/features/auth/domain/bloc/auth/auth_bloc.dart';
 import 'package:todo_list/features/auth/domain/models/auth_user.model.dart';
 import 'package:todo_list/features/auth/grocery/domain/grocery_bloc/grocery_bloc.dart';
@@ -31,6 +32,8 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
   late TextEditingController _lastName;
   late TextEditingController _email;
   late String userId;
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
 
   final TextEditingController _titleGrocery = TextEditingController();
   @override
@@ -70,51 +73,56 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
             }
             return Scaffold(
               appBar: AppBar(
-               titleTextStyle: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                  backgroundColor: Colors.black,
+                titleTextStyle: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+                backgroundColor: Colors.black,
                 title: const Center(child: Text('Grocery List')),
                 actions: <Widget>[
                   IconButton(
-                        onPressed: _logout, icon: const Icon(Icons.logout_rounded,
-                  color: Colors.white,))
+                      onPressed: _logout,
+                      icon: const Icon(
+                        Icons.logout_rounded,
+                        color: Colors.white,
+                      ))
                 ],
                 leading: Builder(
-                 builder: (BuildContext context) {
-                   return IconButton(
-                  icon: const Icon(Icons.menu_rounded,
-                  color: Colors.white,),
-                onPressed: () { Scaffold.of(context).openDrawer(); },
-                  );
-      },
-    ),
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      icon: const Icon(
+                        Icons.menu_rounded,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                    );
+                  },
+                ),
               ),
               drawer: Drawer(
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
                     DrawerHeader(
-                      decoration:
-                      const BoxDecoration(color: Colors.black54),
+                      decoration: const BoxDecoration(color: Colors.black54),
                       child: ListView(
                         children: <Widget>[
-                          const Icon(
-                            Icons.person,
-                            size: 70,
-                            color: Colors.white
-                          ),
+                          const Icon(Icons.person,
+                              size: 70, color: Colors.white),
                           Column(
                             children: [
                               Text(
                                 '${_firstName.text.capitalize()} ${_lastName.text.capitalize()}',
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold,color: Colors.white),
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
                               ),
                               Text(
                                 _email.text,
-                                style: const TextStyle(fontSize: 12, color: Colors.white),
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.white),
                               ),
                             ],
                           ),
@@ -122,7 +130,9 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
                       ),
                     ),
                     ListTile(
-                      title: const Text('Todo'),
+                      leading: const Icon(Icons.checklist_rounded,
+                          color: Colors.grey),
+                      title: const Text('To Do'),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -149,6 +159,8 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
                       },
                     ),
                     ListTile(
+                      leading: const Icon(Icons.shopping_bag_rounded,
+                          color: Colors.grey),
                       title: const Text('Grocery'),
                       onTap: () {
                         Navigator.pop(context);
@@ -170,8 +182,8 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
                         padding:
                             EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         child: Text(
-                          'No grocery to display',
-                          style: TextStyle(fontSize: 15),
+                          'No Grocery',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
                         ),
                       ),
                     ),
@@ -204,28 +216,60 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text('Delete Confirmation...'),
-                              content: Text(
-                                  'Are you sure you want to delete ${titleList.title}?'),
+                              title: const Text(
+                                'Delete',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              content: const Text(
+                                  'Do you confirm deleting this list?'),
                               actions: <Widget>[
-                                ElevatedButton(
-                                    onPressed: () {
-                                      _deleteTitleGrocery(context, titleList.id,
-                                          titleList.title);
-                                    },
-                                    child: const Text('Delete')),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cancel'))
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          alignment: Alignment.centerLeft,
+                                          backgroundColor: Colors.black,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          // Navigator.push(
+                                          //   context,
+                                          //   MaterialPageRoute(
+                                          //     builder: (context) => BlocProvider.value(
+                                          //       value: _titleGroceryBloc,
+                                          //       child: UpdateGroceryTitlePage(
+                                          //         groceryTitleModel: titleList,
+                                          //       ),
+                                          //     ),
+                                          //   ),
+                                          _deleteTitleGrocery(
+                                            context,
+                                            titleList.id,
+                                          );
+                                        },
+                                        child: const Text('Delete')),
+                                    ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          alignment: Alignment.centerLeft,
+                                          backgroundColor: Colors.black,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Cancel')),
+                                  ],
+                                )
                               ],
                             );
                           },
                         );
                       },
                       background: Container(
-                        color: Colors.red,
+                        color: Colors.lightGreen[200],
                         child: const Padding(
                           padding: EdgeInsets.all(15),
                           child: Row(
@@ -267,7 +311,7 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
                               subtitle: Text(formattedDate),
                               trailing: IconButton(
                                 icon: const Icon(
-                                  Icons.more_vert,
+                                  Icons.edit_rounded,
                                 ),
                                 onPressed: () {
                                   Navigator.push(
@@ -292,11 +336,14 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
                 );
               }),
               floatingActionButton: FloatingActionButton(
-                backgroundColor: Colors.purple.shade200,
+                backgroundColor: Colors.black,
                 onPressed: () {
                   _displayAddDialog(context);
                 },
-                child: const Icon(Icons.add),
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
               ),
             );
           },
@@ -311,6 +358,14 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
       const Center(child: CircularProgressIndicator());
       SnackBarUtils.defualtSnackBar(titleGroceryState.errorMessage, context);
     }
+    if (titleGroceryState.isDeleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Grocery deleted!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _logout() {
@@ -321,51 +376,87 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            scrollable: true,
-            title: const Text('Add groceries to your list'),
-            content: Column(
-              children: [
-                TextField(
-                  controller: _titleGrocery,
-                  autofocus: true,
-                  decoration: const InputDecoration(
+          return Form(
+            key: _formKey,
+            child: AlertDialog(
+              scrollable: true,
+              title: const Center(child: Text('Add Grocery List')),
+              content: Column(
+                children: [
+                  TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    controller: _titleGrocery,
+                    autofocus: true,
+                    decoration: InputDecoration(
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.horizontal()),
-                      labelText: 'Grocery Title'),
-                ),
+                        borderSide: const BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      labelStyle: const TextStyle(
+                        color: Colors.green,
+                      ),
+                      labelText: 'Title',
+                    ),
+                    validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Title');
+                      }
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('   ADD   '),
+                      onPressed: () {
+                        _addtitleGroceries(context);
+                       
+                      },
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('CANCEL'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                )
               ],
             ),
-            actions: <Widget>[
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple.shade200,
-                  foregroundColor: Colors.purple.shade400,
-                ),
-                child: const Text('ADD'),
-                onPressed: () {
-                  _addtitleGroceries(context);
-                  Navigator.of(context).pop();
-                  _titleGrocery.clear();
-                },
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple.shade200,
-                  foregroundColor: Colors.purple.shade400,
-                ),
-                child: const Text('CANCEL'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
           );
         });
   }
 
   void _addtitleGroceries(BuildContext context) {
-    _titleGroceryBloc.add(
+    if(_formKey.currentState!.validate()){
+      _titleGroceryBloc.add(
       AddTitleGroceryEvent(
         addTitleGroceryModel: AddTitleGroceryModel(
           title: _titleGrocery.text,
@@ -373,10 +464,14 @@ class _GroceryTitlePageState extends State<GroceryTitlePage> {
         ),
       ),
     );
+     _titleGrocery.clear();
+    Navigator.of(context).pop();
+    
+    }
+     
   }
 
-  void _deleteTitleGrocery(
-      BuildContext context, String id, String title) async {
+  void _deleteTitleGrocery(BuildContext context, String id) {
     _titleGroceryBloc.add(DeleteTitleGroceryEvent(
         deleteTitleGroceryModel: DeleteTitleGroceryModel(id: id)));
 

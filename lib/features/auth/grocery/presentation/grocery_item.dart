@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list/core/enum/state_status.enum.dart';
 import 'package:todo_list/core/global_widgets/snackbar.widget.dart';
+import 'package:todo_list/core/utils/guard.dart';
 import 'package:todo_list/features/auth/grocery/domain/grocery_bloc/grocery_bloc.dart';
 import 'package:todo_list/features/auth/grocery/domain/grocery_title.models/grocery_title.model.dart';
 import 'package:todo_list/features/auth/grocery/domain/models/add_grocery.model.dart';
@@ -24,6 +25,7 @@ class _ProductPageState extends State<ProductPage> {
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
   late String groceryId;
   late String title;
@@ -65,12 +67,12 @@ class _ProductPageState extends State<ProductPage> {
         }
         return Scaffold(
           appBar: AppBar(
-            leading: const Icon(Icons.list_sharp),
-            titleTextStyle: TextStyle(
+            leading: const Icon(Icons.shopping_bag, color: Colors.white,),
+            titleTextStyle: const TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.purple.shade400),
-            backgroundColor: Colors.purple.shade200,
+                color: Colors.white),
+            backgroundColor: Colors.black,
             title: Text('$title List'),
           ),
           body: BlocConsumer<GroceryItemBloc, GroceryItemState>(
@@ -88,20 +90,20 @@ class _ProductPageState extends State<ProductPage> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: Text(
-                        'No groceries to display',
+                        'No Groceries',
                         style: TextStyle(fontSize: 15),
                       ),
                     ),
                   ),
                 );
               }
-              if(groceryState.isDeleted) {
+              if (groceryState.isDeleted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Items deleted'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+                  const SnackBar(
+                    content: Text('Item deleted!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
               }
               return ListView.builder(
                 itemCount: groceryState.groceryList.length,
@@ -115,27 +117,46 @@ class _ProductPageState extends State<ProductPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: const Text('Delete Confirmation...'),
+                            title: const Text(
+                                  'Delete', 
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
                             content: Text(
-                                'Are you sure you want to delete ${groceryList.productName}?'),
+                                'Do you confirm deleting ${groceryList.productName}?'),
                             actions: <Widget>[
-                              ElevatedButton(
-                                  onPressed: () {
-                                    _deleteItem(context, groceryList.id);
-                                  },
-                                  child: const Text('Delete')),
-                              ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Cancel'))
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                                alignment: Alignment.centerLeft,
+                                                backgroundColor: Colors.black,
+                                                foregroundColor: Colors.white,
+                                                 ),
+                                      onPressed: () {
+                                        _deleteItem(context, groceryList.id);
+                                      },
+                                      child: const Text('Delete')),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                                alignment: Alignment.centerLeft,
+                                                backgroundColor: Colors.black,
+                                                foregroundColor: Colors.white,
+                                                 ),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Cancel')),
+                                ],
+                              )
                             ],
                           );
                         },
                       );
                     },
                     background: Container(
-                      color: Colors.red,
+                      color: Colors.lightGreen[200],
                       child: const Padding(
                         padding: EdgeInsets.all(15),
                         child: Row(
@@ -185,26 +206,26 @@ class _ProductPageState extends State<ProductPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 30),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    elevation: 5,
-                  ),
-                  onPressed: () {
-                    // _displayAddDialog(context);
-                    Navigator.pop(context);
-                  },
-                  child: const Icon(
-                    Icons.arrow_back,
+                child: IconButton(
+                  
+                  iconSize: 35,
+                  icon: const Icon(
+                    
+                    Icons.arrow_back_ios_new_rounded,
                     color: Colors.black,
-                  ),
+                    
+                    ), onPressed: () {
+                  // _displayAddDialog(context);
+                  Navigator.pop(context);
+                  },
                 ),
               ),
               FloatingActionButton(
-                backgroundColor: Colors.purple.shade200,
+                backgroundColor: Colors.black,
                 onPressed: () {
                   _displayAddDialog(context);
                 },
-                child: const Icon(Icons.add),
+                child: const Icon(Icons.add, color: Colors.white,),
               ),
             ],
           ),
@@ -219,6 +240,14 @@ class _ProductPageState extends State<ProductPage> {
       const Center(child: CircularProgressIndicator());
       SnackBarUtils.defualtSnackBar(titleGroceryState.errorMessage, context);
     }
+    if (titleGroceryState.isDeleted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Item deleted!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
   }
 
   void _titleGroceryListener(
@@ -233,87 +262,189 @@ class _ProductPageState extends State<ProductPage> {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          scrollable: true,
-          title: const Text('Add groceries to your list'),
-          content: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: TextField(
-                  controller: _productNameController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.horizontal()),
-                      labelText: 'Product Name'),
+        return Form(
+          key: _formKey,
+          child: AlertDialog(
+            scrollable: true,
+            title: const Center(child: Text('Add Groceries')),
+            content: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    controller: _productNameController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.black),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                labelStyle: const TextStyle(
+                                  color: Colors.green,
+                                ),
+                                labelText: 'Product Name',
+                        ),
+                        validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Product Name');
+                      }
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  controller: _quantityController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.horizontal()),
-                      labelText: 'Quantity'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    keyboardType: TextInputType.number,
+                    controller: _quantityController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.black),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                labelStyle: const TextStyle(
+                                  color: Colors.green,
+                                ),
+                                labelText: 'Quantity',
+                        ),
+                        validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Quantity');
+                      }
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  controller: _priceController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.horizontal()),
-                      labelText: 'Price'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    keyboardType: TextInputType.number,
+                    controller: _priceController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.black),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                labelStyle: const TextStyle(
+                                  color: Colors.green,
+                                ),
+                                labelText: 'Price',
+                        ),
+                        validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Price');
+                      }
+                  ),
                 ),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.shade200,
-                foregroundColor: Colors.purple.shade400,
-              ),
-              child: const Text('ADD'),
-              onPressed: () {
-                _addGroceries(context);
-                Navigator.of(context).pop();
-                _productNameController.clear();
-                _quantityController.clear();
-                _priceController.clear();
-              },
+              ],
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.shade200,
-                foregroundColor: Colors.purple.shade400,
-              ),
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
+            
+            actions: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('   ADD   '),
+                    onPressed: () {
+                      _addGroceries(context);
+                    },
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('CANCEL'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              )
+              
+            ],
+            
+          ),
+          
+          
         );
       },
     );
   }
 
   void _addGroceries(BuildContext context) {
-    _groceryBloc.add(AddGroceryEvent(
+    if(_formKey.currentState!.validate()){
+      _groceryBloc.add(AddGroceryEvent(
         addGroceryModel: AddGroceryModel(
       productName: _productNameController.text,
       quantity: _quantityController.text,
       price: _priceController.text,
       titleId: groceryId,
-    )));
+    ))
+    );
+    
+     Navigator.of(context).pop();
+     _productNameController.clear();
+      _quantityController.clear();
+     _priceController.clear();
+    }
+    
   }
 
   void _deleteItem(BuildContext context, String id) {

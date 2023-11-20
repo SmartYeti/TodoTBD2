@@ -88,6 +88,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: _firstNameController,
                           decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                                Icons.person_rounded, 
+                                color: Colors.grey
+                                ),
                             border: OutlineInputBorder(
                                 borderSide:
                                     const BorderSide(color: Colors.black),
@@ -121,6 +125,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: _lastNameController,
                           decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                                Icons.person_rounded, 
+                                color: Colors.grey
+                                ),
                             border: OutlineInputBorder(
                                 borderSide:
                                     const BorderSide(color: Colors.black),
@@ -154,6 +162,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: _emailController,
                           decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                                Icons.email, 
+                                color: Colors.grey
+                                ),
                             border: OutlineInputBorder(
                                 borderSide:
                                     const BorderSide(color: Colors.black),
@@ -188,6 +200,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           controller: _passwordController,
                           obscureText: true,
                           decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                                Icons.key_outlined, 
+                                color: Colors.grey
+                                ),
                             border: OutlineInputBorder(
                                 borderSide:
                                     const BorderSide(color: Colors.black),
@@ -222,6 +238,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           controller: _confirmController,
                           obscureText: true,
                           decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                                Icons.key_outlined, 
+                                color: Colors.grey
+                                ),
                             border: OutlineInputBorder(
                                 borderSide:
                                     const BorderSide(color: Colors.black),

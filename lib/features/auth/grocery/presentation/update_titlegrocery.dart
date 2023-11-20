@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list/core/enum/state_status.enum.dart';
 import 'package:todo_list/core/global_widgets/snackbar.widget.dart';
+import 'package:todo_list/core/utils/guard.dart';
 import 'package:todo_list/features/auth/grocery/domain/grocery_title.models/grocery_title.model.dart';
 import 'package:todo_list/features/auth/grocery/domain/grocery_title.models/update_title.model.dart';
 import 'package:todo_list/features/auth/grocery/domain/title_grocery_bloc/title_grocery_bloc.dart';
@@ -20,6 +21,8 @@ class _UpdateGroceryTitlePageState extends State<UpdateGroceryTitlePage> {
   late TextEditingController _titleController;
   late String _titleIDController;
   late String _updatedAt;
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
 
   @override
   void initState() {
@@ -47,62 +50,97 @@ class _UpdateGroceryTitlePageState extends State<UpdateGroceryTitlePage> {
           appBar: AppBar(
             backgroundColor: Colors.black,
             leading: const SizedBox(
-                height: 10, width: 10, child: Icon(Icons.update)),
+                height: 10, width: 10, child: Icon(Icons.update, 
+                color: Colors.white,)),
             title: const Text('Update Grocery'),
             titleTextStyle: const TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Colors.white),
           ),
-          body: Form(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                      right: 15, top: 90, left: 15, bottom: 10),
-                  child: TextField(
-                    controller: _titleController,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.horizontal()),
-                        labelText: 'Title'),
-                  ),
+          body: Container(
+            alignment: Alignment.center,
+            child: SizedBox(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          right: 15, top: 90, left: 15, bottom: 10),
+                      child: TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        controller: _titleController,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  labelStyle: const TextStyle(
+                                    color: Colors.green,
+                                  ),
+                                  labelText: 'Title',
+                          ),
+                          validator: (String? val) {
+                      return Guard.againstEmptyString(val, 'Title');
+                    }
+                      ),
+                    ),
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 16),
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  foregroundColor: Colors.white,
+                                ),
+                                onPressed: () {
+                                  _updateTitleGorcery(context);
+                                },
+                                child: const Text('Update')),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 16),
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  foregroundColor: Colors.white,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Cancel')),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
                 ),
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 16),
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple.shade200,
-                              foregroundColor: Colors.purple.shade400,
-                            ),
-                            onPressed: () {
-                              _updateTitleGorcery(context);
-                            },
-                            child: const Text('Update')),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 16),
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple.shade200,
-                              foregroundColor: Colors.purple.shade400,
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Cancel')),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+              ),
             ),
           ),
         );
@@ -121,13 +159,15 @@ class _UpdateGroceryTitlePageState extends State<UpdateGroceryTitlePage> {
       SnackBarUtils.defualtSnackBar('Grocery successfully updated!', context);
       return;
     }
+    
   }
 
 //update is working but when Navigator.pop(context) is compiled
 //it gets an error, *Unexpected Null value*
 //without telling what file is getting null value
   void _updateTitleGorcery(BuildContext context) {
-    _titleGroceryBloc.add(
+    if (_formKey.currentState!.validate()){
+       _titleGroceryBloc.add(
       UpdateTitleGroceryEvent(
         updateTitleGroceryModel: UpdateTitleGroceryModel(
           id: _titleIDController,
@@ -136,5 +176,7 @@ class _UpdateGroceryTitlePageState extends State<UpdateGroceryTitlePage> {
         ),
       ),
     );
+    }
+   
   }
 }

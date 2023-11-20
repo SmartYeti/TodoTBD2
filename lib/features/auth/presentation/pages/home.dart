@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list/core/dependency_injection/di_container.dart';
 import 'package:todo_list/core/enum/state_status.enum.dart';
 import 'package:todo_list/core/global_widgets/snackbar.widget.dart';
+import 'package:todo_list/core/utils/guard.dart';
 import 'package:todo_list/features/auth/domain/bloc/auth/auth_bloc.dart';
 import 'package:todo_list/features/auth/domain/models/auth_user.model.dart';
 import 'package:todo_list/features/auth/grocery/domain/grocery_bloc/grocery_bloc.dart';
@@ -27,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   final DIContainer diContainer = DIContainer();
   late AuthBloc _authBloc;
   late TodoBloc _todoBloc;
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
   late String userId;
 
@@ -84,9 +86,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         DrawerHeader(
                           decoration:
-                              const BoxDecoration(color: Colors.black54
-                              ),
-                              
+                              const BoxDecoration(color: Colors.black54),
                           child: ListView(
                             children: <Widget>[
                               const Icon(
@@ -99,13 +99,13 @@ class _HomePageState extends State<HomePage> {
                                   Text(
                                     '${userId!.firstName.capitalize()} ${userId.lastName.capitalize()}',
                                     style: const TextStyle(
-                                        fontWeight: FontWeight.bold, color: Colors.white),
-                                    
-                                      
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
                                   ),
                                   Text(
                                     userId.email,
-                                    style: const TextStyle(fontSize: 12, color: Colors.white),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.white),
                                   ),
                                 ],
                               ),
@@ -113,12 +113,16 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         ListTile(
-                          title: const Text('Todo'),
+                          leading: const Icon(Icons.checklist_rounded,
+                              color: Colors.grey),
+                          title: const Text('To Do'),
                           onTap: () {
                             Navigator.pop(context);
                           },
                         ),
                         ListTile(
+                          leading: const Icon(Icons.shopping_bag_rounded,
+                              color: Colors.grey),
                           title: const Text('Grocery'),
                           onTap: () {
                             Navigator.push(
@@ -159,18 +163,25 @@ class _HomePageState extends State<HomePage> {
                   title: const Center(child: Text('Home')),
                   actions: <Widget>[
                     IconButton(
-                        onPressed: _logout, icon: const Icon(Icons.logout_rounded,
-                  color: Colors.white,))
+                        onPressed: _logout,
+                        icon: const Icon(
+                          Icons.logout_rounded,
+                          color: Colors.white,
+                        ))
                   ],
                   leading: Builder(
-                 builder: (BuildContext context) {
-                   return IconButton(
-                  icon: const Icon(Icons.menu_rounded,
-                  color: Colors.white,),
-                onPressed: () { Scaffold.of(context).openDrawer(); },
-                  );
-      },
-    ),
+                    builder: (BuildContext context) {
+                      return IconButton(
+                        icon: const Icon(
+                          Icons.menu_rounded,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
+                      );
+                    },
+                  ),
                 ),
                 body: Builder(builder: (context) {
                   if (todoState.stateStatus == StateStatus.loading) {
@@ -186,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                               horizontal: 10, vertical: 10),
                           child: Text(
                             'No ToDo',
-                            style: TextStyle(fontSize: 15,color: Colors.grey),
+                            style: TextStyle(fontSize: 15, color: Colors.grey),
                           ),
                         ),
                       ),
@@ -212,27 +223,48 @@ class _HomePageState extends State<HomePage> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: const Text('Delete Confirmation...'),
-                                content: Text(
-                                    'Are you sure you want to delete ${item.title}?'),
+                                title: const Text(
+                                  'Delete',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                content: const Text(
+                                  'Do you confirm deleting this task?',
+                                ),
                                 actions: <Widget>[
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        _deleteTask(context, item.id);
-                                      },
-                                      child: const Text('Delete')),
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Cancel'))
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            alignment: Alignment.centerLeft,
+                                            backgroundColor: Colors.black,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            _deleteTask(context, item.id);
+                                          },
+                                          child: const Text('Delete')),
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            alignment: Alignment.centerLeft,
+                                            backgroundColor: Colors.black,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Cancel')),
+                                    ],
+                                  )
                                 ],
                               );
                             },
                           );
                         },
                         background: Container(
-                          color: Colors.red,
+                          color: Colors.lightGreen[200],
                           child: const Padding(
                             padding: EdgeInsets.all(15),
                             child: Row(
@@ -278,7 +310,6 @@ class _HomePageState extends State<HomePage> {
                 floatingActionButton: FloatingActionButton(
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
-                  
                   onPressed: () {
                     _displayAddDialog(context);
                   },
@@ -318,6 +349,15 @@ class _HomePageState extends State<HomePage> {
       const Center(child: CircularProgressIndicator());
       SnackBarUtils.defualtSnackBar(state.errorMessage, context);
     }
+
+    if (state.isDeleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Task successfully deleted'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _logout() {
@@ -328,140 +368,152 @@ class _HomePageState extends State<HomePage> {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            // backgroundColor: Colors.grey,
-            scrollable: true,
-            title: const Center(child: Text('Add ToDo',
-            style: TextStyle(
-              fontWeight: FontWeight.bold),)),
-            content: Column(
-              children: [
-                TextField(
-                  controller: _titleController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.black,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.black),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.black,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.black,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              labelStyle: const TextStyle(
-                                color: Colors.green,
-                              ),
-                              labelText: 'Title',
-                      ),
-                ),
-                Padding(
-                  
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: SizedBox(
-                    width: 300,
-                    child: TextField(
-                      controller: _descriptionController,
+          return Form(
+            key: _formKey,
+            child: AlertDialog(
+              // backgroundColor: Colors.grey,
+              scrollable: true,
+              title: const Center(
+                  child: Text(
+                'Add ToDo',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )),
+              content: Column(
+                children: [
+                  TextFormField(
+                      controller: _titleController,
                       autofocus: true,
-                      minLines: 3,
-                      maxLines: 5,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.black,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.black),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.black,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.black,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              labelStyle: const TextStyle(
-                                color: Colors.green,
-                              ),
-                              labelText: 'Description',
+                        border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.black,
                           ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.black,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.black,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        labelStyle: const TextStyle(
+                          color: Colors.green,
+                        ),
+                        labelText: 'Title',
+                      ),
+                      validator: (String? val) {
+                        return Guard.againstEmptyString(val, 'Title');
+                      }),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          controller: _descriptionController,
+                          autofocus: true,
+                          minLines: 3,
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Colors.black,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.black),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Colors.black,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Colors.black,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            labelStyle: const TextStyle(
+                              color: Colors.green,
+                            ),
+                            labelText: 'Description',
+                          ),
+                          validator: (String? val) {
+                            return Guard.againstEmptyString(val, 'Description');
+                          }),
                     ),
                   ),
-                ),
+                ],
+              ),
+              actions: <Widget>[
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          alignment: Alignment.centerLeft,
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+
+                        child: const Text('    ADD    '),
+                        
+                        onPressed: () {
+                          // _addTask(context);
+                          // Navigator.of(context).pop();
+                          // _titleController.clear();
+                          // _descriptionController.clear();
+                          _authAdd(context);
+                        },
+                      ),
+                      // const SizedBox(width:40),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          alignment: Alignment.centerRight,
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('CANCEL'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                )
               ],
             ),
-            actions: <Widget>[
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      
-                      style: ElevatedButton.styleFrom(
-                        alignment: Alignment.centerLeft,
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('    ADD    '),
-                      onPressed: () {
-                        _addTask(context);
-                        Navigator.of(context).pop();
-                        _titleController.clear();
-                        _descriptionController.clear();
-                      },
-                    ),
-                    // const SizedBox(width:40),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        alignment: Alignment.centerRight,
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('CANCEL'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              )
-            ],
           );
         });
   }
 
-  void _addTask(BuildContext context) {
-    _todoBloc.add(
-      AddTodoEvent(
-        addtodoModel: AddTodoModel(
-          title: _titleController.text,
-          description: _descriptionController.text,
-          userId: userId,
-        ),
-      ),
-    );
-  }
+  // void _addTask(BuildContext context) {
+  //   _todoBloc.add(
+  //     AddTodoEvent(
+  //       addtodoModel: AddTodoModel(
+  //         title: _titleController.text,
+  //         description: _descriptionController.text,
+  //         userId: userId,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _checkListener(BuildContext context, String id, bool isChecked) {
     _todoBloc.add(
@@ -482,6 +534,24 @@ class _HomePageState extends State<HomePage> {
     );
 
     Navigator.of(context).pop();
+  }
+
+  void _authAdd(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      // _addTask(context);
+      // Navigator.of(context).pop();
+      // _titleController.clear();
+      // _descriptionController.clear();
+      _todoBloc.add(
+        AddTodoEvent(
+            addtodoModel: AddTodoModel(
+          title: _titleController.text,
+          description: _descriptionController.text,
+          userId: userId,
+        )),
+      );
+      Navigator.of(context).pop();
+    }
   }
 }
 
